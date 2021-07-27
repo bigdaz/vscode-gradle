@@ -7,11 +7,12 @@ plugins {
 description = 'vscode-gradle :: gradle-server'
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
+  compile project(":gradle-plugin")
   implementation "org.gradle:gradle-tooling-api:${gradlingToolingApi}"
   implementation 'javax.annotation:javax.annotation-api:1.3.2'
   implementation "io.grpc:grpc-protobuf:${grpcVersion}"
