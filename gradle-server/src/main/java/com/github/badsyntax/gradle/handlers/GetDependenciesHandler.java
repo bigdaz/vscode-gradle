@@ -15,7 +15,6 @@ import com.github.badsyntax.gradle.DependencyItem;
 import com.github.badsyntax.gradle.ErrorMessageBuilder;
 import com.github.badsyntax.gradle.GetDependenciesReply;
 import com.github.badsyntax.gradle.GetDependenciesRequest;
-import com.github.badsyntax.gradle.GradleBuildCancellation;
 import com.github.badsyntax.gradle.GradleProjectConnector;
 import com.github.badsyntax.gradle.exceptions.GradleConnectionException;
 import com.microsoft.gradle.api.GradleDependencyNode;
@@ -30,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import org.gradle.tooling.BuildActionExecuter;
-import org.gradle.tooling.BuildCancelledException;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.slf4j.Logger;
@@ -73,12 +71,9 @@ public class GetDependenciesHandler {
       responseObserver.onNext(
           GetDependenciesReply.newBuilder().setItem(getDependencyItem(root)).build());
       responseObserver.onCompleted();
-    } catch (BuildCancelledException e) {
-      // TODO
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error(e.getMessage());
-    } finally {
-      GradleBuildCancellation.clearToken(req.getCancellationKey());
+      responseObserver.onError(ErrorMessageBuilder.build(e));
     }
   }
 

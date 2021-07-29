@@ -8,8 +8,8 @@ package gradle;
 
 service Gradle {
   rpc GetBuild(GetBuildRequest) returns (stream GetBuildReply) {}
-  rpc GetDependencies(GetDependenciesRequest) returns (stream GetDependenciesReply) {}
   rpc RunBuild(RunBuildRequest) returns (stream RunBuildReply) {}
+  rpc GetDependencies(GetDependenciesRequest) returns (GetDependenciesReply) {}
   rpc CancelBuild(CancelBuildRequest) returns (CancelBuildReply) {}
   rpc CancelBuilds(CancelBuildsRequest) returns (CancelBuildsReply) {}
   rpc GetDaemonsStatus(GetDaemonsStatusRequest) returns (GetDaemonsStatusReply) {}
@@ -41,8 +41,7 @@ message GetBuildResult {
 
 message GetDependenciesRequest {
   string project_dir = 1;
-  string cancellation_key = 2;
-  GradleConfig gradle_config = 3;
+  GradleConfig gradle_config = 2;
 }
 
 message GetDependenciesReply {

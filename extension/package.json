@@ -291,7 +291,7 @@
       },
       {
         "command": "gradle.omitted.reveal",
-        "title": "Go To Omitted Dependency",
+        "title": "Go to Omitted Dependency",
         "icon": "$(go-to-file)"
       }
     ],
