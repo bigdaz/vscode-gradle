@@ -1,6 +1,6 @@
 # Gradle Tasks
 
-[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/richardwillis.vscode-gradle)](https://marketplace.visualstudio.com/items?itemName=richardwillis.vscode-gradle)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/vscjava.vscode-gradle)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle)
 [![Build & Publish](https://github.com/badsyntax/vscode-gradle/workflows/Build%20&%20Publish/badge.svg)](https://github.com/badsyntax/vscode-gradle/actions?query=workflow%3A%22Build+%26+Publish%22)
 [![CodeQL](https://github.com/badsyntax/vscode-gradle/workflows/CodeQL/badge.svg)](https://github.com/badsyntax/vscode-gradle/actions?query=workflow%3ACodeQL)
 [![GitHub bug issues](https://img.shields.io/github/issues/badsyntax/vscode-gradle/bug?label=bug%20reports)](https://github.com/badsyntax/vscode-gradle/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
