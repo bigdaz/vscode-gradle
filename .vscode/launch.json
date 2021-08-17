@@ -42,6 +42,12 @@
       }
     },
     {
+      "type": "java",
+      "name": "Launch Syntax Language Server",
+      "request": "launch",
+      "mainClass": "com.microsoft.gradle.GradleLanguageServer",
+    },
+    {
       "name": "Test: Groovy Default",
       "type": "extensionHost",
       "request": "launch",

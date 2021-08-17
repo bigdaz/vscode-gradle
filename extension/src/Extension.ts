@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as net from 'net';
 import { logger, LogVerbosity, Logger } from './logger';
 import { Api } from './api';
 import { GradleClient } from './client';
@@ -39,6 +41,9 @@ import { DependencyTreeItem } from './views/gradleTasks/DependencyTreeItem';
 import { GRADLE_DEPENDENCY_REVEAL } from './views/gradleTasks/DependencyUtils';
 import { GradleDependencyProvider } from './dependencies/GradleDependencyProvider';
 import { getSpecificVersionStatus } from './views/gradleDaemons/util';
+import { LanguageClientOptions } from 'vscode-languageclient';
+import { LanguageClient, StreamInfo } from 'vscode-languageclient/node';
+import { OutputInfoCollector } from './OutputInfoCollector';
 
 export class Extension {
   private readonly client: GradleClient;
@@ -198,6 +203,82 @@ export class Extension {
     );
 
     void this.activate();
+
+    const displayName = 'Gradle';
+
+    void vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Window },
+      (progress) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        return new Promise<void>(async (resolve, _reject) => {
+          progress.report({
+            message: 'Initializing Gradle language server...',
+          });
+          const clientOptions: LanguageClientOptions = {
+            documentSelector: [{ scheme: 'file', language: 'gradle' }],
+            synchronize: {
+              configurationSection: 'gradle',
+            },
+            uriConverters: {
+              code2Protocol: (value: vscode.Uri): string => {
+                if (/^win32/.test(process.platform)) {
+                  // drive letters on Windows are encoded with %3A instead of :
+                  // but Java doesn't treat them the same
+                  return value.toString().replace('%3A', ':');
+                } else {
+                  return value.toString();
+                }
+              },
+              // this is just the default behavior, but we need to define both
+              protocol2Code: (value): vscode.Uri => vscode.Uri.parse(value),
+            },
+            outputChannel: new OutputInfoCollector(displayName),
+            outputChannelName: displayName,
+          };
+          // eslint-disable-next-line sonarjs/no-unused-collection
+          const args = [
+            '-jar',
+            path.resolve(
+              context.extensionPath,
+              'lib',
+              'gradle-syntax-server-all.jar'
+            ),
+          ];
+          // uncomment to allow a debugger to attach to the language server
+          args.unshift(
+            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=6006'
+          );
+          const serverOptions = this.awaitServerConnection.bind(null, '6006');
+          const languageClient = new LanguageClient(
+            'gradle',
+            'Gradle Language Server CS',
+            serverOptions,
+            clientOptions
+          );
+          languageClient.onReady().then(resolve, () => {
+            resolve();
+            void vscode.window.showErrorMessage('start ERROR');
+          });
+          const disposable = languageClient.start();
+          context.subscriptions.push(disposable);
+        });
+      }
+    );
+  }
+
+  private async awaitServerConnection(port: string): Promise<StreamInfo> {
+    const addr = parseInt(port);
+    return new Promise((res, rej) => {
+      const server = net.createServer((stream) => {
+        server.close();
+        res({ reader: stream, writer: stream });
+      });
+      server.on('error', rej);
+      server.listen(addr, () => {
+        server.removeListener('error', rej);
+      });
+      return server;
+    });
   }
 
   private storeSubscriptions(): void {
