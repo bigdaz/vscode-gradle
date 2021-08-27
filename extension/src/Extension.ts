@@ -42,11 +42,7 @@ import { GRADLE_DEPENDENCY_REVEAL } from './views/gradleTasks/DependencyUtils';
 import { GradleDependencyProvider } from './dependencies/GradleDependencyProvider';
 import { getSpecificVersionStatus } from './views/gradleDaemons/util';
 import { LanguageClientOptions } from 'vscode-languageclient';
-import {
-  Executable,
-  LanguageClient,
-  StreamInfo,
-} from 'vscode-languageclient/node';
+import { LanguageClient, StreamInfo } from 'vscode-languageclient/node';
 import { OutputInfoCollector } from './OutputInfoCollector';
 
 export class Extension {
@@ -239,30 +235,31 @@ export class Extension {
             outputChannel: new OutputInfoCollector(displayName),
             outputChannelName: displayName,
           };
-          // eslint-disable-next-line sonarjs/no-unused-collection
-          const args = [
-            '-jar',
-            path.resolve(
-              context.extensionPath,
-              'lib',
-              'gradle-syntax-server.jar'
-            ),
-          ];
-          // uncomment to allow a debugger to attach to the language server
-          /*args.unshift(
-            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=6006'
-          );*/
-          const executable: Executable = {
-            command:
-              'C:/Program Files/AdoptOpenJDK/jdk-11.0.11.9-hotspot/bin/java',
-            args: args,
-          };
-          const serverOptions = this.awaitServerConnection.bind(null, '6006');
-          serverOptions;
+          let serverOptions;
+          if (
+            process.env.VSCODE_DEBUG_LANGUAGE_SERVER?.toLowerCase() === 'true'
+          ) {
+            // debug mode
+            serverOptions = this.awaitServerConnection.bind(null, '6006');
+          } else {
+            const args = [
+              '-jar',
+              path.resolve(
+                context.extensionPath,
+                'lib',
+                'gradle-language-server.jar'
+              ),
+            ];
+            serverOptions = {
+              command:
+                'C:/Program Files/AdoptOpenJDK/jdk-11.0.11.9-hotspot/bin/java',
+              args: args,
+            };
+          }
           const languageClient = new LanguageClient(
             'gradle',
             'Gradle Language Server CS',
-            /*serverOptions*/ executable,
+            serverOptions,
             clientOptions
           );
           languageClient.onReady().then(resolve, (reason: any) => {

@@ -43,10 +43,19 @@ public class GradleLanguageServer implements LanguageServer, LanguageClientAware
   public static void main(String[] args) {
     GradleLanguageServer server = new GradleLanguageServer(new GradleCompilationUnitManager());
     try {
-      /*Launcher<LanguageClient> launcher = Launcher.createLauncher(server, LanguageClient.class, socket.getInputStream(),
-          socket.getOutputStream());*/
-      Launcher<LanguageClient> launcher = Launcher.createLauncher(server, LanguageClient.class, System.in,
-          System.out);
+      Launcher<LanguageClient> launcher;
+      String port = System.getenv("VSCODE_GRADLE_PORT");
+      if (port == null) {
+        launcher = Launcher.createLauncher(server, LanguageClient.class, System.in, System.out);
+      } else {
+        int portValue = Integer.parseInt(port);
+        if (portValue <= 1 || portValue >= 65535) {
+          throw new Exception("The port must be an integer between 1 and 65535. It was: '" + portValue + "'.");
+        }
+        Socket socket = new Socket("localhost", portValue);
+        launcher = Launcher.createLauncher(server, LanguageClient.class, socket.getInputStream(),
+            socket.getOutputStream());
+      }
       server.connect(launcher.getRemoteProxy());
       launcher.startListening();
     } catch (Exception e) {

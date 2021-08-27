@@ -23,7 +23,7 @@ dependencies {
 ext.mainClass = "com.microsoft.gradle.GradleLanguageServer"
 
 task copyJar(type: Copy) {
-  from "build/libs/gradle-syntax-server.jar"
+  from "build/libs/gradle-language-server.jar"
   from configurations.runtimeClasspath
   into "../extension/lib"
 }
