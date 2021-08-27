@@ -43,9 +43,10 @@ public class GradleLanguageServer implements LanguageServer, LanguageClientAware
   public static void main(String[] args) {
     GradleLanguageServer server = new GradleLanguageServer(new GradleCompilationUnitManager());
     try {
-      Socket socket = new Socket("127.0.0.1", 6006);
-      Launcher<LanguageClient> launcher = Launcher.createLauncher(server, LanguageClient.class, socket.getInputStream(),
-          socket.getOutputStream());
+      /*Launcher<LanguageClient> launcher = Launcher.createLauncher(server, LanguageClient.class, socket.getInputStream(),
+          socket.getOutputStream());*/
+      Launcher<LanguageClient> launcher = Launcher.createLauncher(server, LanguageClient.class, System.in,
+          System.out);
       server.connect(launcher.getRemoteProxy());
       launcher.startListening();
     } catch (Exception e) {

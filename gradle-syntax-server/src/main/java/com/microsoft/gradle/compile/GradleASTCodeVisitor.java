@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import com.microsoft.gradle.semantictokens.TokenModifier;
 import com.microsoft.gradle.semantictokens.TokenType;
 import com.microsoft.gradle.utils.GradleUtils;
 
@@ -148,6 +149,10 @@ public class GradleASTCodeVisitor extends ClassCodeVisitorSupport {
     public int getLength() {
       return length;
     }
+
+    public String getName() {
+      return name;
+    }
   }
 
   public SemanticTokens getSemanticTokens(URI uri) {
@@ -208,6 +213,10 @@ public class GradleASTCodeVisitor extends ClassCodeVisitorSupport {
 
   private void addToken(ASTNode node, TokenType tokenType) {
     addToken(node, tokenType, 0, node.getText());
+  }
+
+  private void addToken(ASTNode node, TokenType tokenType, int modifiers) {
+    addToken(node, tokenType, modifiers, node.getText());
   }
 
   public void visitCompilationUnit(CompilationUnit cu) {
@@ -804,8 +813,8 @@ public class GradleASTCodeVisitor extends ClassCodeVisitorSupport {
   }
 
   public void visitMethodCallExpression(MethodCallExpression node) {
-    if (node.getMethod().getText().equals("dependencies")) {
-      addToken(node.getMethod(), TokenType.KEYWORD);
+    if (TokenModifier.isDefaultLibrary(node.getMethod().getText())) {
+      addToken(node.getMethod(), TokenType.FUNCTION, TokenModifier.DEFAULT_LIBRARY.bitmask);
     } else {
       addToken(node.getMethod(), TokenType.FUNCTION);
     }

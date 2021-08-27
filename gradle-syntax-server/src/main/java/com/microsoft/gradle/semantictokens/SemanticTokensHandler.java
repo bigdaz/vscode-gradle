@@ -12,7 +12,6 @@
 *******************************************************************************/
 package com.microsoft.gradle.semantictokens;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -24,14 +23,10 @@ public class SemanticTokensHandler {
 
   SemanticTokensHandler() {}
 
-  public static SemanticTokens full(SemanticTokensParams params) {
-    return null;
-  }
-
   public static SemanticTokensLegend legend() {
 		return new SemanticTokensLegend(
 			Arrays.stream(TokenType.values()).map(TokenType::toString).collect(Collectors.toList()),
-			new ArrayList<>()
+			Arrays.stream(TokenModifier.values()).map(TokenModifier::toString).collect(Collectors.toList())
 		);
 	}
 }

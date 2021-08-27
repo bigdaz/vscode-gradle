@@ -12,20 +12,34 @@
 *******************************************************************************/
 package com.microsoft.gradle.semantictokens;
 
-import org.eclipse.lsp4j.SemanticTokenTypes;
+import org.eclipse.lsp4j.SemanticTokenModifiers;
 
-public enum TokenType {
-  FUNCTION(SemanticTokenTypes.Function), PROPERTY(SemanticTokenTypes.Property), VARIABLE(SemanticTokenTypes.Variable),
-  PARAMETER(SemanticTokenTypes.Parameter), KEYWORD(SemanticTokenTypes.Keyword);
+public enum TokenModifier {
+
+  DECLARATION(SemanticTokenModifiers.Declaration), DEFAULT_LIBRARY(SemanticTokenModifiers.DefaultLibrary);
 
   private String genericName;
+  public final int bitmask = 1 << ordinal();
 
-  TokenType(String genericName) {
+  TokenModifier(String genericName) {
     this.genericName = genericName;
   }
 
   @Override
   public String toString() {
     return genericName;
+  }
+
+  public static boolean isDefaultLibrary(String method) {
+    switch (method) {
+      case "dependencies":
+      case "repositories":
+      case "apply":
+      case "configurations":
+      case "task":
+        return true;
+      default:
+        return false;
+    }
   }
 }
