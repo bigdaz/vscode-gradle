@@ -25,7 +25,11 @@ import com.microsoft.gradle.compile.GradleASTCodeVisitor;
 import com.microsoft.gradle.completion.DependencyCompletionHandler;
 import com.microsoft.gradle.manager.GradleCompilationUnitManager;
 import com.microsoft.gradle.manager.GradleFilesManager;
+import com.microsoft.gradle.utils.GradleUtils;
 
+import org.codehaus.groovy.ast.ASTNode;
+import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.expr.MethodCallExpression;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.ErrorCollector;
 import org.codehaus.groovy.control.Phases;
@@ -196,7 +200,27 @@ public class GradleServices implements TextDocumentService, WorkspaceService, La
         for (; i < entry.getValue().size(); i++) {
           DocumentSymbol symbol = entry.getValue().get(i);
           if (Ranges.containsPosition(symbol.getRange(), params.getPosition())) {
-            switch (symbol.getName()) {
+            break;
+          }
+        }
+        if (i == entry.getValue().size()) {
+          return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForProject());
+        }
+      }
+    }
+    // In closures
+    for (Map.Entry<URI, Set<MethodCallExpression>> entry : this.astVisitor.getCalls().entrySet()) {
+      if (entry.getKey().getPath().equals(uri.getPath())) {
+        List<MethodCallExpression> res = new ArrayList<>();
+        for (MethodCallExpression node : entry.getValue()) {
+          Expression arg = node.getArguments();
+          Range range = GradleUtils.getExpressionLSPRange(arg);
+          if (Ranges.containsPosition(range, params.getPosition())) {
+            // handle multiple case
+            // handle task case
+            String method = node.getMethodAsString();
+            res.add(node);
+            /*switch (node.getMethodAsString()) {
               // IDEA GradleProjectContributor
               case "allprojects":
               case "subprojects":
@@ -209,13 +233,11 @@ public class GradleServices implements TextDocumentService, WorkspaceService, La
                 return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForRepositories());
               case "task":
                 return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForTasks());
-            }
-            break;
+            }*/
+            // break;
           }
         }
-        if (i == entry.getValue().size()) {
-          return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForProject());
-        }
+        String test = "";
       }
     }
     return CompletableFuture.completedFuture(null);
