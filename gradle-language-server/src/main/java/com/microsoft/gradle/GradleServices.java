@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import com.microsoft.gradle.compile.GradleASTCodeVisitor;
 import com.microsoft.gradle.completion.DependencyCompletionHandler;
+import com.microsoft.gradle.completion.GradleLibraryResolver;
 import com.microsoft.gradle.manager.GradleCompilationUnitManager;
 import com.microsoft.gradle.manager.GradleFilesManager;
 import com.microsoft.gradle.utils.GradleUtils;
@@ -165,6 +166,12 @@ public class GradleServices implements TextDocumentService, WorkspaceService, La
   @Override
   public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(
       DocumentSymbolParams params) {
+    /*GradleLibraryResolver r = new GradleLibraryResolver();
+    try {
+      r.resolve();
+    } catch (Exception e) {
+
+    }*/
     URI uri = URI.create(params.getTextDocument().getUri());
     List<Either<SymbolInformation, DocumentSymbol>> result = new ArrayList<>();
     for (Map.Entry<URI, List<DocumentSymbol>> entry : this.astVisitor.getDocumentSymbols().entrySet()) {
@@ -220,20 +227,18 @@ public class GradleServices implements TextDocumentService, WorkspaceService, La
             // handle task case
             String method = node.getMethodAsString();
             res.add(node);
-            /*switch (node.getMethodAsString()) {
-              // IDEA GradleProjectContributor
-              case "allprojects":
-              case "subprojects":
-              case "project":
-              case "configure":
-                return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForProject());
-              case "dependencies":
-                return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForDependencies());
-              case "repositories":
-                return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForRepositories());
-              case "task":
-                return CompletableFuture.completedFuture(this.dependencyCompletionHandler.completionForTasks());
-            }*/
+            /*
+             * switch (node.getMethodAsString()) { // IDEA GradleProjectContributor case
+             * "allprojects": case "subprojects": case "project": case "configure": return
+             * CompletableFuture.completedFuture(this.dependencyCompletionHandler.
+             * completionForProject()); case "dependencies": return
+             * CompletableFuture.completedFuture(this.dependencyCompletionHandler.
+             * completionForDependencies()); case "repositories": return
+             * CompletableFuture.completedFuture(this.dependencyCompletionHandler.
+             * completionForRepositories()); case "task": return
+             * CompletableFuture.completedFuture(this.dependencyCompletionHandler.
+             * completionForTasks()); }
+             */
             // break;
           }
         }
