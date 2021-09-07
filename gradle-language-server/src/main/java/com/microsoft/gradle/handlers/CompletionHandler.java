@@ -30,7 +30,9 @@ import org.eclipse.lsp4j.InsertTextFormat;
 
 public class CompletionHandler {
 
-  public List<CompletionItem> getCompletionItems(MethodCallExpression containingCall, GradleLibraryResolver resolver) {
+  private static String DEPENDENCYHANDLER_CLASS = "org.gradle.api.artifacts.dsl.DependencyHandler";
+
+  public List<CompletionItem> getCompletionItems(MethodCallExpression containingCall, GradleLibraryResolver resolver, boolean javaPluginsIncluded) {
     String delegateClassName = (containingCall == null) ? GradleDelegate.getDefault()
         : GradleDelegate.getDelegateMap().get(containingCall.getMethodAsString());
     if (delegateClassName == null) {
@@ -40,10 +42,10 @@ public class CompletionHandler {
     if (delegateClass == null) {
       return Collections.emptyList();
     }
-    return getCompletionItemsFromClass(delegateClass);
+    return getCompletionItemsFromClass(delegateClass, resolver, javaPluginsIncluded);
   }
 
-  private List<CompletionItem> getCompletionItemsFromClass(JavaClass javaClass) {
+  private List<CompletionItem> getCompletionItemsFromClass(JavaClass javaClass, GradleLibraryResolver resolver, boolean javaPluginsIncluded) {
     if (javaClass == null) {
       return Collections.emptyList();
     }
@@ -107,6 +109,22 @@ public class CompletionHandler {
             results.add(item);
           }
         }
+      }
+    }
+    if (javaPluginsIncluded && javaClass.getClassName().equals(DEPENDENCYHANDLER_CLASS)) {
+      // for dependency {}, we offer java configurations if there is any applied java plugin
+      for (String plugin : resolver.getJavaConfigurations()) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(plugin);
+        builder.append("(Object... o)");
+        StringBuilder insertBuilder = new StringBuilder();
+        insertBuilder.append(plugin);
+        insertBuilder.append("($0)");
+        CompletionItem item = new CompletionItem(builder.toString());
+        item.setKind(CompletionItemKind.Function);
+        item.setInsertTextFormat(InsertTextFormat.Snippet);
+        item.setInsertText(insertBuilder.toString());
+        results.add(item);
       }
     }
     return results;
